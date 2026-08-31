@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { flexRender } from "@tanstack/react-table";
 import {
   getCoreRowModel,
@@ -75,12 +75,6 @@ export function DataTable<TData extends RowData>({
   const derivedPageCount = isControlled
     ? Math.max(1, pageCount ?? 1)
     : Math.max(1, Math.ceil(data.length / pageSize));
-
-  useEffect(() => {
-    if (!isControlled) {
-      setInternalPage((current) => Math.min(current, derivedPageCount));
-    }
-  }, [derivedPageCount, isControlled]);
 
   const currentPage = isControlled ? (page ?? 1) : Math.min(internalPage, derivedPageCount);
 

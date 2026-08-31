@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { DataTable, type DataTableColumn } from "@/components/shared/data-table";
 import { DataTableActions } from "@/components/shared/data-table-actions";
 import { ListToolbar } from "@/components/shared/list-toolbar";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,

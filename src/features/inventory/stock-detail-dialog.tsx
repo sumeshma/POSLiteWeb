@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Warehouse } from "lucide-react";
 import { formatDateTime } from "@/lib/date";
 import { formatQuantity } from "@/lib/formatters";
@@ -68,6 +68,11 @@ export function StockDetailDialog({
   productId,
 }: StockDetailDialogProps) {
   const [page, setPage] = useState(1);
+  const [pageProductId, setPageProductId] = useState(productId);
+  if (productId !== pageProductId) {
+    setPageProductId(productId);
+    setPage(1);
+  }
   const productQuery = useProductQuery(open ? productId : null);
   const movementsQuery = useStockMovementsQuery(
     {
@@ -79,10 +84,6 @@ export function StockDetailDialog({
   );
 
   const product = productQuery.data;
-
-  useEffect(() => {
-    setPage(1);
-  }, [productId]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

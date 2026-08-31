@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { useForm } from "react-hook-form";
+import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -14,10 +15,6 @@ import { getLastShopCode } from "@/lib/session";
 import { getErrorMessage } from "@/types/api";
 import { loginSchema, type LoginFormValues } from "@/features/auth/login-schema";
 
-type LoginFormProps = {
-  sessionExpired?: boolean;
-};
-
 function useLastShopCode(): string {
   return useSyncExternalStore(
     (onStoreChange) => {
@@ -29,12 +26,15 @@ function useLastShopCode(): string {
   );
 }
 
-export function LoginForm({ sessionExpired = false }: LoginFormProps) {
+export function LoginForm() {
   const { login } = useAuth();
+  const searchParams = useSearchParams();
   const lastShopCode = useLastShopCode();
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(
-    sessionExpired ? "Your session has expired. Please sign in again." : null,
+    searchParams.get("reason") === "session"
+      ? "Your session has expired. Please sign in again."
+      : null,
   );
 
   const form = useForm<LoginFormValues>({
