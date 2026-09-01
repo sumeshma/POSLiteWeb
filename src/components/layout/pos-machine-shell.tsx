@@ -5,6 +5,7 @@ import Link from "next/link";
 import { LayoutDashboard, LogOut, Menu, Monitor, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { BrandLogo } from "@/components/layout/brand-logo";
+import { FullscreenToggle } from "@/components/layout/fullscreen-toggle";
 import { HeaderUserMenu } from "@/components/layout/user-menu";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,6 +58,7 @@ export function PosMachineShell({ children }: { children: ReactNode }) {
             {shopLabel ? `${shopLabel} · Machine Mode` : "Machine Mode"}
           </p>
         </div>
+        <FullscreenToggle />
         <HeaderUserMenu />
       </header>
       <main className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</main>

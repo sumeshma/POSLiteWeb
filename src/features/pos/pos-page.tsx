@@ -22,7 +22,7 @@ export function PosPage() {
 
   return (
     <RequirePermission permission={permissions.pos}>
-      <PageContainer fill>
+      <PageContainer fill className="gap-3">
         <div className="flex items-center justify-end">
           <Link
             href="/pos/machine"
@@ -32,8 +32,8 @@ export function PosPage() {
             POS Machine Mode
           </Link>
         </div>
-        <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_28rem]">
-          <section className="flex min-h-0 min-w-0 flex-col gap-3">
+        <div className="grid min-h-0 flex-1 gap-4 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_24rem] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden xl:grid-cols-[minmax(0,1fr)_28rem]">
+          <section className="flex h-full min-h-0 min-w-0 flex-col gap-3 overflow-hidden">
             <form className="flex gap-2" onSubmit={pos.handleSearchSubmit}>
               <Input
                 id="pos-product-search"

@@ -1,6 +1,7 @@
 "use client";
 
-import { Minus, Plus, Trash2, UserRound } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, Minus, Plus, Trash2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -76,15 +77,41 @@ export function PosCartPanel({
     ? `PAY ${formatCurrency(totals.totalAmount)}`
     : `Checkout ${formatCurrency(totals.totalAmount)}`;
 
+  const itemCount = cart.lines.length;
+  const itemCountLabel = itemCount === 1 ? "1 item" : `${itemCount} items`;
+
   return (
-    <aside className="flex min-h-0 flex-col rounded-xl border border-border bg-card">
-      <div className={cn("flex items-start justify-between gap-2 border-b", machine ? "p-4" : "p-3")}>
-        <div>
-          <p className={cn("font-medium", machine && "text-base")}>Current order</p>
-          <p className="text-xs text-muted-foreground">
+    <aside className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-border bg-card">
+      <div className="flex shrink-0 items-center gap-2 border-b p-3">
+        <UserRound className="size-4 shrink-0 text-muted-foreground" />
+        <div className="min-w-0 flex-1">
+          <p className={cn("truncate font-medium", machine && "text-base")}>
+            {customerLabel(cart.customer)}
+          </p>
+          <p className="truncate text-xs text-muted-foreground">
             {cart.heldOrderId ? "Resumed hold" : "New sale"}
+            {itemCount > 0 ? ` · ${itemCountLabel}` : ""}
+            {cart.customer?.phone ? ` · ${cart.customer.phone}` : ""}
           </p>
         </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size={machine ? "default" : "sm"}
+          onClick={onSelectCustomer}
+        >
+          {cart.customer ? "Change" : "Customer"}
+        </Button>
+        {cart.customer ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size={machine ? "default" : "sm"}
+            onClick={onClearCustomer}
+          >
+            Walk-in
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="outline"
@@ -95,32 +122,15 @@ export function PosCartPanel({
         </Button>
       </div>
 
-      <div className={cn("flex items-center gap-2 border-b", machine ? "p-4" : "p-3")}>
-        <UserRound className="size-4 shrink-0 text-muted-foreground" />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">{customerLabel(cart.customer)}</p>
-          {cart.customer?.phone ? (
-            <p className="truncate text-xs text-muted-foreground">{cart.customer.phone}</p>
-          ) : null}
-        </div>
-        <Button type="button" variant="ghost" size={machine ? "default" : "sm"} onClick={onSelectCustomer}>
-          {cart.customer ? "Change" : "Customer"}
-        </Button>
-        {cart.customer ? (
-          <Button type="button" variant="ghost" size={machine ? "default" : "sm"} onClick={onClearCustomer}>
-            Walk-in
-          </Button>
-        ) : null}
-      </div>
-
-      <div className={cn("min-h-0 flex-1 overflow-y-auto", machine ? "p-4" : "p-3")}>
-        {cart.lines.length === 0 ? (
+      <div className="min-h-[8rem] flex-1 overflow-y-auto">
+        {itemCount === 0 ? (
           <EmptyState
+            className="py-8"
             title="Cart is empty"
             description="Search or tap a product to add it to the bill."
           />
         ) : (
-          <ul className={cn(machine ? "space-y-4" : "space-y-3")}>
+          <ul className={cn("p-3", machine ? "space-y-2.5" : "space-y-2")}>
             {cart.lines.map((line) => (
               <CartLineRow
                 key={line.productId}
@@ -137,11 +147,11 @@ export function PosCartPanel({
         )}
       </div>
 
-      <div className={cn("space-y-3 border-t", machine ? "p-4" : "p-3")}>
-        <div className="grid grid-cols-2 gap-2">
+      <div className="shrink-0 space-y-1.5 border-t bg-card px-3 py-2">
+        <div className="grid grid-cols-3 gap-2">
           <div className="space-y-1">
             <Label htmlFor="pos-order-type" className="text-xs">
-              Order type
+              Type
             </Label>
             <Select
               value={cart.orderType}
@@ -175,9 +185,9 @@ export function PosCartPanel({
               onChange={(event) => onPackaging(Number(event.target.value) || 0)}
             />
           </div>
-          <div className="space-y-1 col-span-2">
+          <div className="space-y-1">
             <Label htmlFor="pos-discount" className="text-xs">
-              Bill discount
+              Discount
             </Label>
             <Input
               id="pos-discount"
@@ -191,11 +201,13 @@ export function PosCartPanel({
           </div>
         </div>
 
-        <dl className="space-y-1 text-sm">
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">Subtotal</dt>
-            <dd className="tabular-nums">{formatCurrency(totals.subTotal)}</dd>
-          </div>
+        <dl className="space-y-0.5 text-sm">
+          {totals.discountAmount > 0 || totals.packagingCharge > 0 ? (
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Subtotal</dt>
+              <dd className="tabular-nums">{formatCurrency(totals.subTotal)}</dd>
+            </div>
+          ) : null}
           {totals.discountAmount > 0 ? (
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Bill discount</dt>
@@ -208,7 +220,7 @@ export function PosCartPanel({
               <dd className="tabular-nums">{formatCurrency(totals.packagingCharge)}</dd>
             </div>
           ) : null}
-          <div className={cn("flex justify-between font-semibold", machine ? "text-xl" : "text-base")}>
+          <div className={cn("flex justify-between font-semibold", machine ? "text-lg" : "text-sm")}>
             <dt>Total</dt>
             <dd className="tabular-nums">{formatCurrency(totals.totalAmount)}</dd>
           </div>
@@ -219,28 +231,35 @@ export function PosCartPanel({
           </p>
         ) : null}
 
-        <div className={cn("grid grid-cols-2", machine ? "gap-3" : "gap-2")}>
+        <div className="grid grid-cols-[minmax(4.25rem,5.25rem)_minmax(0,1fr)] gap-1.5">
+          <div className="grid grid-rows-2 gap-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-full"
+              onClick={onClear}
+              disabled={cart.lines.length === 0}
+            >
+              Clear
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-full"
+              onClick={onHold}
+              disabled={cart.lines.length === 0 || submitting}
+            >
+              Hold
+            </Button>
+          </div>
           <Button
             type="button"
-            variant="outline"
-            size={machine ? "lg" : "default"}
-            onClick={onClear}
-            disabled={cart.lines.length === 0}
-          >
-            Clear
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size={machine ? "lg" : "default"}
-            onClick={onHold}
-            disabled={cart.lines.length === 0 || submitting}
-          >
-            Hold
-          </Button>
-          <Button
-            type="button"
-            className={cn("col-span-2", machine && "h-14 text-base font-semibold")}
+            className={cn(
+              "h-full! min-h-[3.5rem] text-sm font-semibold",
+              machine && "min-h-[3.75rem]",
+            )}
             onClick={onCheckout}
             disabled={!canCheckout || submitting}
           >
@@ -269,69 +288,91 @@ function CartLineRow({
   onItemDiscount: (discountAmount: number) => void;
   onRemove: () => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const detailsId = `pos-line-${line.productId}`;
+
   return (
-    <li className={cn("space-y-2 rounded-lg border border-border", machine ? "p-3" : "p-2")}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="font-medium">{line.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {formatCurrency(line.unitPrice)}
-            {line.unit ? ` / ${line.unit}` : ""}
-            {line.discountAmount > 0 ? ` · Disc ${formatCurrency(line.discountAmount)}` : ""}
-          </p>
-        </div>
-        <p className="shrink-0 font-medium tabular-nums">{formatCurrency(lineNet(line))}</p>
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-1">
-          <Button
-            type="button"
-            variant="outline"
-            size={machine ? "icon-lg" : "icon-xs"}
-            onClick={onDecrement}
-            aria-label="Decrease quantity"
-          >
-            <Minus />
-          </Button>
-          <Input
-            className={cn("text-center", machine ? "h-10 w-16" : "h-7 w-14")}
-            type="number"
-            min={1}
-            value={line.quantity}
-            onChange={(event) => onQuantity(Number(event.target.value) || 0)}
-            aria-label={`Quantity for ${line.name}`}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size={machine ? "icon-lg" : "icon-xs"}
-            onClick={onIncrement}
-            aria-label="Increase quantity"
-          >
-            <Plus />
-          </Button>
-        </div>
-        <Input
-          className={machine ? "h-10 w-28" : "h-7 w-24"}
-          type="number"
-          min={0}
-          step="0.01"
-          value={line.discountAmount || ""}
-          onChange={(event) => onItemDiscount(Number(event.target.value) || 0)}
-          aria-label={`Item discount for ${line.name}`}
-          placeholder="Discount"
-        />
+    <li className={cn("rounded-lg border border-border bg-muted/30", machine ? "p-2.5" : "p-2")}>
+      <div className="flex items-start gap-1">
+        <button
+          type="button"
+          className="min-w-0 flex-1 rounded-md text-left"
+          onClick={() => setOpen((current) => !current)}
+          aria-expanded={open}
+          aria-controls={detailsId}
+        >
+          <span className="flex items-start gap-1.5">
+            <ChevronDown
+              className={cn(
+                "mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform",
+                open && "rotate-180",
+              )}
+              aria-hidden="true"
+            />
+            <span className="min-w-0 flex-1">
+              <span className="block leading-tight font-medium">{line.name}</span>
+              <span className="block text-xs leading-tight text-muted-foreground">
+                {line.quantity} × {formatCurrency(line.unitPrice)}
+                {line.unit ? ` / ${line.unit}` : ""}
+                {line.discountAmount > 0 ? ` · Disc ${formatCurrency(line.discountAmount)}` : ""}
+              </span>
+            </span>
+            <span className="shrink-0 font-medium tabular-nums">{formatCurrency(lineNet(line))}</span>
+          </span>
+        </button>
         <Button
           type="button"
           variant="ghost"
-          size={machine ? "default" : "icon-xs"}
+          size={machine ? "icon-lg" : "icon-xs"}
+          className="shrink-0 text-muted-foreground hover:text-destructive"
           onClick={onRemove}
           aria-label={`Remove ${line.name}`}
         >
           <Trash2 />
-          {machine ? "Remove" : null}
         </Button>
       </div>
+      {open ? (
+        <div id={detailsId} className="mt-2 ml-5 flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="outline"
+              size={machine ? "icon-lg" : "icon-xs"}
+              onClick={onDecrement}
+              aria-label="Decrease quantity"
+            >
+              <Minus />
+            </Button>
+            <Input
+              className={cn("text-center", machine ? "h-10 w-16" : "h-7 w-14")}
+              type="number"
+              min={1}
+              value={line.quantity}
+              onChange={(event) => onQuantity(Number(event.target.value) || 0)}
+              aria-label={`Quantity for ${line.name}`}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size={machine ? "icon-lg" : "icon-xs"}
+              onClick={onIncrement}
+              aria-label="Increase quantity"
+            >
+              <Plus />
+            </Button>
+          </div>
+          <Input
+            className={machine ? "h-10 w-28" : "h-7 w-24"}
+            type="number"
+            min={0}
+            step="0.01"
+            value={line.discountAmount || ""}
+            onChange={(event) => onItemDiscount(Number(event.target.value) || 0)}
+            aria-label={`Item discount for ${line.name}`}
+            placeholder="Discount"
+          />
+        </div>
+      ) : null}
     </li>
   );
 }

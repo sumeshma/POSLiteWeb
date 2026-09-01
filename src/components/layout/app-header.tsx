@@ -1,14 +1,22 @@
 "use client";
 
 import { Menu, PanelLeft } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useAppShell } from "@/components/layout/app-shell-context";
 import { MobileNav } from "@/components/layout/app-sidebar";
+import { FullscreenToggle } from "@/components/layout/fullscreen-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { HeaderUserMenu } from "@/components/layout/user-menu";
 
+function isStandardPosPath(pathname: string): boolean {
+  return pathname.replace(/\/$/, "") === "/pos";
+}
+
 export function AppHeader() {
+  const pathname = usePathname();
   const { collapsed, setCollapsed, mobileOpen, setMobileOpen } = useAppShell();
+  const showFullscreen = isStandardPosPath(pathname);
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-3 border-b bg-white px-3 md:px-4">
@@ -34,6 +42,7 @@ export function AppHeader() {
         <PanelLeft className="size-4" />
       </Button>
       <div className="min-w-0 flex-1" />
+      {showFullscreen ? <FullscreenToggle /> : null}
       <HeaderUserMenu />
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="w-72 p-0" showCloseButton>

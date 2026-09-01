@@ -62,8 +62,8 @@ export function PosMachinePage() {
   return (
     <RequirePermission permission={permissions.pos}>
       <div className="flex min-h-0 flex-1 flex-col p-3 md:p-4">
-        <div className="grid min-h-0 flex-1 gap-3 max-md:grid-rows-[minmax(0,1fr)_minmax(18rem,42%)] md:grid-cols-[minmax(0,1fr)_22rem] lg:grid-cols-[minmax(0,1fr)_26rem] xl:grid-cols-[minmax(0,1fr)_30rem]">
-          <section className="flex min-h-0 min-w-0 flex-col gap-3">
+        <div className="grid min-h-0 flex-1 overflow-hidden max-md:grid-rows-[minmax(0,1fr)_minmax(22rem,42%)] md:grid-cols-[minmax(0,1fr)_22rem] md:grid-rows-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_26rem] xl:grid-cols-[minmax(0,1fr)_30rem] gap-3">
+          <section className="flex h-full min-h-0 min-w-0 flex-col gap-3 overflow-hidden">
             <form className="flex gap-2" onSubmit={pos.handleSearchSubmit}>
               <Input
                 id="pos-product-search"
