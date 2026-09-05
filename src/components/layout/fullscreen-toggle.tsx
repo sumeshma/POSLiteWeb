@@ -1,12 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function fullscreenElement(): Element | null {
   const doc = document as Document & { webkitFullscreenElement?: Element | null };
   return document.fullscreenElement ?? doc.webkitFullscreenElement ?? null;
+}
+
+function subscribeFullscreen(onStoreChange: () => void): () => void {
+  document.addEventListener("fullscreenchange", onStoreChange);
+  document.addEventListener("webkitfullscreenchange", onStoreChange);
+  return () => {
+    document.removeEventListener("fullscreenchange", onStoreChange);
+    document.removeEventListener("webkitfullscreenchange", onStoreChange);
+  };
 }
 
 async function enterFullscreen(): Promise<void> {
@@ -30,21 +39,11 @@ async function exitFullscreen(): Promise<void> {
 }
 
 export function FullscreenToggle() {
-  const [active, setActive] = useState(false);
-
-  const sync = useCallback(() => {
-    setActive(Boolean(fullscreenElement()));
-  }, []);
-
-  useEffect(() => {
-    sync();
-    document.addEventListener("fullscreenchange", sync);
-    document.addEventListener("webkitfullscreenchange", sync);
-    return () => {
-      document.removeEventListener("fullscreenchange", sync);
-      document.removeEventListener("webkitfullscreenchange", sync);
-    };
-  }, [sync]);
+  const active = useSyncExternalStore(
+    subscribeFullscreen,
+    () => Boolean(fullscreenElement()),
+    () => false,
+  );
 
   async function toggle() {
     try {

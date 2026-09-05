@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { BrandLogo } from "@/components/layout/brand-logo";
@@ -11,11 +11,17 @@ const SSO_FAILURE_COPY = "Open the company again from Auralizz";
 
 const ssoAttempts = new Map<string, Promise<"ok" | "error">>();
 
-function readCallbackCode(): string {
-  if (typeof window === "undefined") {
-    return "";
-  }
-  return new URLSearchParams(window.location.search).get("code")?.trim() ?? "";
+function subscribeSearch(onStoreChange: () => void): () => void {
+  window.addEventListener("popstate", onStoreChange);
+  return () => window.removeEventListener("popstate", onStoreChange);
+}
+
+function getSearch(): string {
+  return window.location.search;
+}
+
+function readCallbackCode(search: string): string {
+  return new URLSearchParams(search).get("code")?.trim() ?? "";
 }
 
 function redeemOnce(code: string, redeem: (code: string) => Promise<void>): Promise<"ok" | "error"> {
@@ -34,12 +40,17 @@ function redeemOnce(code: string, redeem: (code: string) => Promise<void>): Prom
 export function SsoCallbackPage() {
   const router = useRouter();
   const { completeSso } = useAuth();
-  const [status, setStatus] = useState<"pending" | "error">("pending");
+  const isClient = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  );
+  const search = useSyncExternalStore(subscribeSearch, getSearch, () => "");
+  const code = isClient ? readCallbackCode(search) : "";
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    const code = readCallbackCode();
     if (!code) {
-      setStatus("error");
       return;
     }
 
@@ -52,13 +63,15 @@ export function SsoCallbackPage() {
         router.replace("/");
         return;
       }
-      setStatus("error");
+      setFailed(true);
     });
 
     return () => {
       active = false;
     };
-  }, [completeSso, router]);
+  }, [code, completeSso, router]);
+
+  const showError = isClient && (!code || failed);
 
   return (
     <div className="relative flex min-h-svh flex-col bg-background">
@@ -74,7 +87,7 @@ export function SsoCallbackPage() {
           <div className="overflow-hidden rounded-xl bg-card text-card-foreground shadow-sm ring-1 ring-foreground/10">
             <div className="h-1.5 bg-brand-gradient" />
             <div className="p-6 md:p-8">
-              {status === "error" ? (
+              {showError ? (
                 <Alert variant="destructive">
                   <AlertTitle>Unable to sign in</AlertTitle>
                   <AlertDescription>{SSO_FAILURE_COPY}</AlertDescription>
