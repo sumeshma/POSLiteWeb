@@ -13,16 +13,19 @@ import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { appConfig } from "@/config/app";
 import { queryKeys } from "@/config/query-keys";
+import { isPublicAuthPath } from "@/lib/auth-paths";
 import { hasPermission } from "@/lib/permissions";
 import {
   clearSession,
   getServerSessionSnapshot,
   getSessionSnapshot,
+  isCompleteAuthPayload,
+  persistAuthSession,
   subscribeSession,
   subscribeUnauthorized,
-  writeSession,
 } from "@/lib/session";
 import {
+  completeSso as completeSsoRequest,
   getShopBranding,
   login as loginRequest,
   logoutCurrentSession,
@@ -65,6 +68,7 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   isReady: boolean;
   login: (input: LoginInput) => Promise<void>;
+  completeSso: (code: string) => Promise<void>;
   logout: () => Promise<void>;
   can: (permission: string) => boolean;
 };
@@ -87,11 +91,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return subscribeUnauthorized(() => {
       queryClient.removeQueries({ queryKey: queryKeys.auth.all() });
       queryClient.clear();
-      if (!pathname.startsWith("/login")) {
+      if (!isPublicAuthPath(pathname)) {
         router.replace("/login?reason=session");
       }
     });
   }, [pathname, queryClient, router]);
+
+  const persistShopSession = useCallback(
+    async (data: Parameters<typeof persistAuthSession>[0]) => {
+      const shopCode = data.shopCode.trim().toUpperCase();
+      let shopDisplayName = data.shopDisplayName ?? null;
+      if (!shopDisplayName) {
+        try {
+          const branding = await getShopBranding(shopCode);
+          shopDisplayName = branding.appDisplayName;
+        } catch {
+          shopDisplayName = null;
+        }
+      }
+
+      persistAuthSession({
+        ...data,
+        shopCode,
+        shopDisplayName,
+      });
+      queryClient.clear();
+    },
+    [queryClient],
+  );
 
   const login = useCallback(
     async (input: LoginInput) => {
@@ -103,25 +130,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginDevice: appConfig.loginDevice,
       });
 
-      let shopDisplayName: string | null = null;
-      try {
-        const branding = await getShopBranding(shopCode);
-        shopDisplayName = branding.appDisplayName;
-      } catch {
-        shopDisplayName = null;
-      }
-
-      writeSession({
+      await persistShopSession({
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         accessTokenExpiresAt: data.accessTokenExpiresAt,
         refreshTokenExpiresAt: data.refreshTokenExpiresAt,
         shopCode,
-        shopDisplayName,
         user: data.user,
-        sessionInfo: data.session,
+        session: data.session,
       });
+    },
+    [persistShopSession],
+  );
 
+  const completeSso = useCallback(
+    async (code: string) => {
+      const data = await completeSsoRequest({ code });
+      if (!isCompleteAuthPayload(data)) {
+        throw new Error("SSO_INCOMPLETE");
+      }
+
+      persistAuthSession({
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        accessTokenExpiresAt: data.accessTokenExpiresAt,
+        refreshTokenExpiresAt: data.refreshTokenExpiresAt,
+        shopCode: data.shopCode,
+        shopDisplayName: data.shopDisplayName ?? null,
+        user: data.user,
+        session: data.session,
+        sessionInfo: data.sessionInfo,
+      });
       queryClient.clear();
     },
     [queryClient],
@@ -155,10 +194,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: Boolean(session),
       isReady,
       login,
+      completeSso,
       logout,
       can,
     }),
-    [can, isReady, login, logout, session],
+    [can, completeSso, isReady, login, logout, session],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

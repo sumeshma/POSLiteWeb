@@ -1,5 +1,5 @@
 import type { AuthTokenPair } from "@/types/api";
-import type { AuthUser, PersistedSession } from "@/types/auth";
+import type { AuthUser, PersistedSession, SessionInfo } from "@/types/auth";
 
 const SESSION_KEY = "poslite.session";
 const LAST_SHOP_CODE_KEY = "poslite.lastShopCode";
@@ -56,6 +56,45 @@ export function writeSession(session: PersistedSession): void {
   window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   window.localStorage.setItem(LAST_SHOP_CODE_KEY, session.shopCode);
   emitSessionChange();
+}
+
+type AuthSessionPayload = {
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpiresAt: string;
+  refreshTokenExpiresAt: string;
+  user: AuthUser;
+  shopCode: string;
+  shopDisplayName?: string | null;
+  session?: SessionInfo | null;
+  sessionInfo?: SessionInfo | null;
+};
+
+export function isCompleteAuthPayload(
+  data: Partial<AuthSessionPayload> | null | undefined,
+): data is AuthSessionPayload {
+  return Boolean(
+    data?.accessToken &&
+      data.refreshToken &&
+      data.accessTokenExpiresAt &&
+      data.refreshTokenExpiresAt &&
+      data.user &&
+      data.shopCode?.trim(),
+  );
+}
+
+/** Writes the same persisted session shape used by password login. */
+export function persistAuthSession(data: AuthSessionPayload): void {
+  writeSession({
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
+    accessTokenExpiresAt: data.accessTokenExpiresAt,
+    refreshTokenExpiresAt: data.refreshTokenExpiresAt,
+    shopCode: data.shopCode.trim().toUpperCase(),
+    shopDisplayName: data.shopDisplayName ?? null,
+    user: data.user,
+    sessionInfo: data.sessionInfo ?? data.session ?? null,
+  });
 }
 
 export function clearSession(): void {

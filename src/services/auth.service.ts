@@ -4,6 +4,8 @@ import type {
   LoginRequest,
   LoginResponse,
   ShopBranding,
+  SsoCompleteRequest,
+  SsoCompleteResponse,
   TokenResponse,
 } from "@/types/auth";
 
@@ -12,6 +14,14 @@ export async function login(request: LoginRequest): Promise<LoginResponse> {
     skipAuth: true,
     skipRefresh: true,
     shopCode: request.shopCode,
+  });
+}
+
+export async function completeSso(request: SsoCompleteRequest): Promise<SsoCompleteResponse> {
+  return apiClient.post<SsoCompleteResponse>("/api/auth/sso/complete", request, {
+    skipAuth: true,
+    skipShopCode: true,
+    skipRefresh: true,
   });
 }
 

@@ -42,6 +42,21 @@ export type LoginResponse = {
   session: SessionInfo | null;
 };
 
+export type SsoCompleteRequest = {
+  code: string;
+};
+
+/**
+ * POS Lite SSO complete payload. Same token/user shape as login, plus the
+ * shop the opaque code was issued for. `sessionInfo` is accepted as an alias
+ * of login's `session` field.
+ */
+export type SsoCompleteResponse = LoginResponse & {
+  shopCode: string;
+  shopDisplayName?: string | null;
+  sessionInfo?: SessionInfo | null;
+};
+
 /** Verified against Swagger TokenResponseDto. */
 export type TokenResponse = {
   accessToken: string;

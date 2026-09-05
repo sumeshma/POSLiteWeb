@@ -1,8 +1,23 @@
 {
   "trailingSlash": "auto",
+  "routes": [
+    {
+      "route": "/sso/callback",
+      "rewrite": "/sso/callback/index.html"
+    },
+    {
+      "route": "/sso/callback/",
+      "rewrite": "/sso/callback/index.html"
+    }
+  ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/brand/*", "/_next/*", "*.{css,js,ico,png,jpg,jpeg,gif,svg,webp,woff,woff2,txt,json}"]
+    "exclude": [
+      "/brand/*",
+      "/_next/*",
+      "/sso/*",
+      "*.{css,js,ico,png,jpg,jpeg,gif,svg,webp,woff,woff2,txt,json}"
+    ]
   },
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",
