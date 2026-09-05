@@ -1,15 +1,5 @@
 {
   "trailingSlash": "auto",
-  "routes": [
-    {
-      "route": "/sso/callback",
-      "rewrite": "/sso/callback/index.html"
-    },
-    {
-      "route": "/sso/callback/",
-      "rewrite": "/sso/callback/index.html"
-    }
-  ],
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": [
