@@ -12,6 +12,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { appConfig } from "@/config/app";
+import { env } from "@/config/env";
 import { queryKeys } from "@/config/query-keys";
 import { isPublicAuthPath } from "@/lib/auth-paths";
 import { hasPermission } from "@/lib/permissions";
@@ -184,6 +185,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       clearSession();
       queryClient.clear();
+      if (env.auralizzHomeUrl) {
+        window.location.assign(env.auralizzHomeUrl);
+        return;
+      }
       router.replace("/login");
     }
   }, [queryClient, router, session?.refreshToken]);
