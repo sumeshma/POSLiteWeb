@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { BrandLogo } from "@/components/layout/brand-logo";
 import { FullscreenToggle } from "@/components/layout/fullscreen-toggle";
 import { HeaderUserMenu } from "@/components/layout/user-menu";
+import { formatShopSessionLabel } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,7 +21,7 @@ import {
 
 export function PosMachineShell({ children }: { children: ReactNode }) {
   const { session, logout } = useAuth();
-  const shopLabel = session?.shopDisplayName || session?.shopCode;
+  const shopLabel = formatShopSessionLabel(session?.shopCode, session?.shopDisplayName);
 
   return (
     <div className="flex h-svh min-h-0 flex-col bg-background">

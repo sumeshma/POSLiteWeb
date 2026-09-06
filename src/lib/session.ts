@@ -5,6 +5,43 @@ const SESSION_KEY = "poslite.session";
 const LAST_SHOP_CODE_KEY = "poslite.lastShopCode";
 const LEGACY_KEYS = ["poslite.accessToken", "poslite.refreshToken", "poslite.shopCode"];
 
+/** Default BusinessName seeded into every new POS Lite shop database. */
+const SEEDED_SHOP_DISPLAY_NAME = "Auralizz Juice Shop";
+
+export function resolveShopDisplayName(
+  shopCode: string,
+  ...candidates: Array<string | null | undefined>
+): string {
+  const code = shopCode.trim().toUpperCase();
+  for (const candidate of candidates) {
+    const value = candidate?.trim();
+    if (
+      value &&
+      value.toLowerCase() !== SEEDED_SHOP_DISPLAY_NAME.toLowerCase()
+    ) {
+      return value;
+    }
+  }
+  return code;
+}
+
+export function formatShopSessionLabel(
+  shopCode: string | null | undefined,
+  shopDisplayName?: string | null,
+): string | null {
+  const code = shopCode?.trim();
+  if (!code) {
+    return null;
+  }
+
+  const name = shopDisplayName?.trim();
+  if (name && name.toUpperCase() !== code.toUpperCase()) {
+    return `${name} · ${code}`;
+  }
+
+  return code;
+}
+
 function isBrowser(): boolean {
   return typeof window !== "undefined";
 }

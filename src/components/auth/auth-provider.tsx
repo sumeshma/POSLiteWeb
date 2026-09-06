@@ -21,6 +21,7 @@ import {
   getSessionSnapshot,
   isCompleteAuthPayload,
   persistAuthSession,
+  resolveShopDisplayName,
   subscribeSession,
   subscribeUnauthorized,
 } from "@/lib/session";
@@ -100,20 +101,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const persistShopSession = useCallback(
     async (data: Parameters<typeof persistAuthSession>[0]) => {
       const shopCode = data.shopCode.trim().toUpperCase();
-      let shopDisplayName = data.shopDisplayName ?? null;
-      if (!shopDisplayName) {
-        try {
-          const branding = await getShopBranding(shopCode);
-          shopDisplayName = branding.appDisplayName;
-        } catch {
-          shopDisplayName = null;
-        }
+      let brandingName: string | null = null;
+      try {
+        const branding = await getShopBranding(shopCode);
+        brandingName = branding.appDisplayName;
+      } catch {
+        brandingName = null;
       }
 
       persistAuthSession({
         ...data,
         shopCode,
-        shopDisplayName,
+        shopDisplayName: resolveShopDisplayName(
+          shopCode,
+          data.shopDisplayName,
+          brandingName,
+        ),
       });
       queryClient.clear();
     },

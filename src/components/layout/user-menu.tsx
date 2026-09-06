@@ -16,6 +16,7 @@ import {
 import { ChangePasswordDialog } from "@/features/account/change-password-dialog";
 import { ProfileDialog } from "@/features/account/profile-dialog";
 import { resolveMediaUrl } from "@/lib/media";
+import { formatShopSessionLabel } from "@/lib/session";
 import { getUserDisplayName, getUserInitials } from "@/types/auth";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +31,7 @@ export function UserMenu({ compact = false }: UserMenuProps) {
   const displayName = getUserDisplayName(user);
   const initials = getUserInitials(user);
   const imageUrl = resolveMediaUrl(user?.profileImageUrl);
-  const shopLabel = session?.shopDisplayName || session?.shopCode;
+  const shopLabel = formatShopSessionLabel(session?.shopCode, session?.shopDisplayName);
 
   return (
     <>
@@ -95,6 +96,7 @@ export function HeaderUserMenu() {
   const displayName = getUserDisplayName(user);
   const initials = getUserInitials(user);
   const imageUrl = resolveMediaUrl(user?.profileImageUrl);
+  const shopLabel = formatShopSessionLabel(session?.shopCode, session?.shopDisplayName);
 
   return (
     <>
@@ -106,7 +108,7 @@ export function HeaderUserMenu() {
           <span className="hidden min-w-0 text-right sm:inline">
             <span className="block truncate text-sm font-medium">{displayName}</span>
             <span className="block truncate text-xs text-muted-foreground">
-              {session?.shopDisplayName || session?.shopCode}
+              {shopLabel}
             </span>
           </span>
           <Avatar size="sm">
