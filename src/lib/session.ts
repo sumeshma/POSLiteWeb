@@ -104,6 +104,7 @@ export function clearSession(): void {
 
   clearLegacyKeys();
   window.localStorage.removeItem(SESSION_KEY);
+  window.localStorage.removeItem(LAST_SHOP_CODE_KEY);
   emitSessionChange();
 }
 

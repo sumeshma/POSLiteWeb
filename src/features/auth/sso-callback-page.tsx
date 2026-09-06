@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { BrandLogo } from "@/components/layout/brand-logo";
 import { LoadingState } from "@/components/shared/loading-state";
@@ -38,7 +37,6 @@ function redeemOnce(code: string, redeem: (code: string) => Promise<void>): Prom
 }
 
 export function SsoCallbackPage() {
-  const router = useRouter();
   const { completeSso } = useAuth();
   const isClient = useSyncExternalStore(
     () => () => undefined,
@@ -60,7 +58,9 @@ export function SsoCallbackPage() {
         return;
       }
       if (result === "ok") {
-        router.replace("/");
+        // Full load so AuthGuard and API headers boot from the new shop session.
+        // Client replace("/") left the previous shop in memory until a refresh.
+        window.location.replace("/");
         return;
       }
       setFailed(true);
@@ -69,7 +69,7 @@ export function SsoCallbackPage() {
     return () => {
       active = false;
     };
-  }, [code, completeSso, router]);
+  }, [code, completeSso]);
 
   const showError = isClient && (!code || failed);
 
