@@ -48,29 +48,32 @@ export function KpiCard({
 
   return (
     <div
+      data-tone={tone}
       className={cn(
-        "flex h-full items-center gap-3.5 rounded-xl border border-border bg-white p-4 shadow-sm",
+        "kpi-card flex h-full min-w-0 items-center gap-2 rounded-xl border border-border bg-white p-2.5 shadow-sm sm:gap-3.5 sm:p-4",
         className,
       )}
     >
       {Icon ? (
         <div
           className={cn(
-            "flex size-11 shrink-0 items-center justify-center rounded-lg",
+            "hidden size-9 shrink-0 items-center justify-center rounded-lg sm:flex sm:size-11",
             styles.icon,
           )}
         >
-          <Icon className="size-5" aria-hidden />
+          <Icon className="size-4 sm:size-5" aria-hidden />
         </div>
       ) : null}
       <div className="min-w-0 flex-1">
-        <p className={cn("text-[11px] font-medium tracking-wide uppercase", styles.label)}>
+        <p className={cn("truncate text-[10px] font-medium tracking-wide uppercase sm:text-[11px]", styles.label)}>
           {label}
         </p>
-        <p className="mt-0.5 text-[1.625rem] leading-8 font-semibold tabular-nums text-foreground">
+        <p className="mt-0.5 truncate text-base leading-5 font-semibold tabular-nums text-foreground sm:text-[1.625rem] sm:leading-8">
           {value}
         </p>
-        {hint ? <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p> : null}
+        {hint ? (
+          <p className="mt-0.5 hidden truncate text-xs text-muted-foreground sm:block">{hint}</p>
+        ) : null}
       </div>
     </div>
   );

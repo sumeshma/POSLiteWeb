@@ -1,17 +1,22 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AppShellContext } from "@/components/layout/app-shell-context";
+import { normalizePathname } from "@/lib/auth-paths";
+import { cn } from "@/lib/utils";
 
 type AppShellProps = {
   children: ReactNode;
 };
 
 export function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const fillMain = normalizePathname(pathname) === "/pos";
 
   const contextValue = useMemo(
     () => ({
@@ -37,7 +42,10 @@ export function AppShell({ children }: AppShellProps) {
           <AppHeader />
           <main
             id="main-content"
-            className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto"
+            className={cn(
+              "flex min-h-0 min-w-0 flex-1 flex-col",
+              fillMain ? "overflow-hidden" : "overflow-y-auto",
+            )}
           >
             {children}
           </main>

@@ -186,3 +186,102 @@
     background-image: linear-gradient(135deg, var(--gradient-from), var(--gradient-to));
   }
 }
+
+@keyframes dashboard-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-reveal {
+  animation: dashboard-reveal 0.45s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-reveal {
+    animation: none;
+  }
+}
+
+.kpi-card {
+  --kpi-accent: var(--primary);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.kpi-card[data-tone="primary"] {
+  --kpi-accent: var(--primary);
+}
+
+.kpi-card[data-tone="secondary"] {
+  --kpi-accent: var(--brand-secondary);
+}
+
+.kpi-card[data-tone="success"] {
+  --kpi-accent: var(--success);
+}
+
+.kpi-card[data-tone="warning"] {
+  --kpi-accent: var(--warning);
+}
+
+.kpi-card[data-tone="destructive"] {
+  --kpi-accent: var(--destructive);
+}
+
+.kpi-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(var(--kpi-accent) 1px, transparent 1.2px);
+  background-size: 11px 11px;
+  opacity: 0.08;
+  mask-image: radial-gradient(ellipse 90% 80% at 100% 100%, black 18%, transparent 72%);
+}
+
+.kpi-card::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  width: 7.25rem;
+  height: 7.25rem;
+  right: -2.35rem;
+  bottom: -2.6rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--kpi-accent) 22%, white);
+  opacity: 0.55;
+}
+
+.kpi-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes app-loading-bar {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(360%);
+  }
+}
+
+.app-loading-bar {
+  animation: app-loading-bar 1.15s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-loading-bar {
+    animation: none;
+    width: 42%;
+  }
+}

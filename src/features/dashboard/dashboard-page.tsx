@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import {
   AlertTriangle,
   ClipboardList,
@@ -18,7 +18,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
-import { buttonVariants } from "@/components/ui/button";
+import { DashboardPanel, DashboardTable, DashboardTableRow } from "./dashboard-panel";
+import { QuickAccessBar, type QuickAccessItem } from "./quick-access-bar";
 import { permissions } from "@/config/permissions";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useActiveHoldCountQuery } from "@/features/pos/use-pos";
@@ -189,21 +190,38 @@ export function DashboardPage() {
       ]
     : [];
 
+  const quickAccessItems: QuickAccessItem[] = [
+    canPos ? { href: "/pos", label: "New sale", icon: ShoppingCart } : null,
+    canOpenReports ? { href: "/reports", label: "Reports", icon: FileBarChart } : null,
+    can(permissions.productsManage)
+      ? { href: "/products", label: "Products", icon: PackagePlus }
+      : null,
+    can(permissions.purchasesManage)
+      ? { href: "/purchases/new", label: "Record purchase", icon: ClipboardList }
+      : null,
+    can(permissions.expensesManage)
+      ? { href: "/expenses", label: "Expenses", icon: Wallet }
+      : null,
+    canInventory ? { href: "/inventory", label: "Inventory", icon: Warehouse } : null,
+  ].filter((item): item is QuickAccessItem => item !== null);
+
   return (
     <PageContainer card={false}>
-      <PageHeader
-        title="Dashboard"
-        description={`Shop overview for ${resolved.label}. Figures come from backend report and inventory summaries.`}
-        actions={
-          <ReportPeriodToolbar
-            period={period}
-            onPeriodChange={setPeriod}
-            allowMonthly={canMonthly}
-          />
-        }
-      />
+      <DashboardReveal delay={0}>
+        <PageHeader
+          title="Dashboard"
+          description={`Shop overview for ${resolved.label}. Figures come from backend report and inventory summaries.`}
+          actions={
+            <ReportPeriodToolbar
+              period={period}
+              onPeriodChange={setPeriod}
+              allowMonthly={canMonthly}
+            />
+          }
+        />
+      </DashboardReveal>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <DashboardReveal delay={60} className="grid grid-cols-4 gap-2 md:gap-3">
         <KpiCard
           label="Sales"
           value={salesEnabled ? formatKpiCurrency(totalSales) : "—"}
@@ -243,9 +261,10 @@ export function DashboardPage() {
           icon={AlertTriangle}
           tone="destructive"
         />
-      </div>
+      </DashboardReveal>
 
-      {salesEnabled ? (
+      <DashboardReveal delay={120}>
+        {salesEnabled ? (
         salesQuery.isLoading || (!periodHasSales && canMonthly && (monthlySales.isLoading || yearlySales.isLoading)) ? (
           <LoadingState label="Loading sales graph..." />
         ) : salesQuery.isError && monthlySales.isError ? (
@@ -272,59 +291,21 @@ export function DashboardPage() {
           description="You do not have permission to view sales reports for this period."
         />
       )}
+      </DashboardReveal>
 
-      <DashboardCharts
-        stockHealth={canInventory && !inventoryQuery.isError ? stockHealth : []}
-      />
+      <DashboardReveal delay={180}>
+        <DashboardCharts
+          stockHealth={canInventory && !inventoryQuery.isError ? stockHealth : []}
+        />
+      </DashboardReveal>
 
-      <div className="flex flex-wrap gap-2">
-        {canPos ? (
-          <Link href="/pos" className={cn(buttonVariants())}>
-            <ShoppingCart />
-            New sale
-          </Link>
-        ) : null}
-        {canOpenReports ? (
-          <Link href="/reports" className={cn(buttonVariants({ variant: "secondary" }))}>
-            <FileBarChart />
-            Reports
-          </Link>
-        ) : null}
-        {can(permissions.productsManage) ? (
-          <Link href="/products" className={cn(buttonVariants({ variant: "secondary" }))}>
-            <PackagePlus />
-            Products
-          </Link>
-        ) : null}
-        {can(permissions.purchasesManage) ? (
-          <Link href="/purchases/new" className={cn(buttonVariants({ variant: "secondary" }))}>
-            <ClipboardList />
-            Record purchase
-          </Link>
-        ) : null}
-        {can(permissions.expensesManage) ? (
-          <Link href="/expenses" className={cn(buttonVariants({ variant: "secondary" }))}>
-            <Wallet />
-            Expenses
-          </Link>
-        ) : null}
-        {canInventory ? (
-          <Link href="/inventory" className={cn(buttonVariants({ variant: "secondary" }))}>
-            <Warehouse />
-            Inventory
-          </Link>
-        ) : null}
-      </div>
+      <DashboardReveal delay={240}>
+        <QuickAccessBar items={quickAccessItems} />
+      </DashboardReveal>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <DashboardReveal delay={300} className="grid gap-4 lg:grid-cols-2">
         {canOrders ? (
-          <section className="rounded-xl border border-border bg-card p-4">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <h2 className="text-sm font-medium">Recent bills</h2>
-              <Link href="/reports/sales" className="text-sm text-secondary hover:underline">
-                Sales report
-              </Link>
-            </div>
+          <DashboardPanel title="Recent bills" href="/reports/sales" linkLabel="Sales report">
             {recentOrders.isLoading ? (
               <LoadingState className="py-6" label="Loading bills..." />
             ) : recentOrders.isError ? (
@@ -337,34 +318,22 @@ export function DashboardPage() {
             ) : (recentOrders.data?.items ?? []).length === 0 ? (
               <EmptyState className="py-6" title="No recent bills" />
             ) : (
-              <ul className="space-y-2 text-sm">
+              <DashboardTable primaryLabel="Bill" valueLabel="Amount">
                 {(recentOrders.data?.items ?? []).map((order) => (
-                  <li
+                  <DashboardTableRow
                     key={order.id}
-                    className="flex items-center justify-between gap-2 border-b border-border py-2 last:border-0"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-medium">{order.billNumber || "Bill"}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDateTime(order.createdAt)} · {order.paymentMethod || "—"}
-                      </p>
-                    </div>
-                    <p className="shrink-0 tabular-nums">{formatCurrency(order.totalAmount)}</p>
-                  </li>
+                    title={order.billNumber || "Bill"}
+                    subtitle={`${formatDateTime(order.createdAt)} · ${order.paymentMethod || "—"}`}
+                    value={formatCurrency(order.totalAmount)}
+                  />
                 ))}
-              </ul>
+              </DashboardTable>
             )}
-          </section>
+          </DashboardPanel>
         ) : null}
 
         {canInventory ? (
-          <section className="rounded-xl border border-border bg-card p-4">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <h2 className="text-sm font-medium">Low stock</h2>
-              <Link href="/inventory" className="text-sm text-secondary hover:underline">
-                Inventory
-              </Link>
-            </div>
+          <DashboardPanel title="Low stock" href="/inventory" linkLabel="Inventory">
             {inventoryQuery.isLoading ? (
               <LoadingState className="py-6" label="Loading stock..." />
             ) : inventoryQuery.isError ? (
@@ -377,35 +346,28 @@ export function DashboardPage() {
             ) : (inventoryQuery.data?.lowStockProducts ?? []).length === 0 ? (
               <EmptyState className="py-6" title="No low-stock items" />
             ) : (
-              <ul className="space-y-2 text-sm">
+              <DashboardTable primaryLabel="Product" valueLabel="Qty">
                 {(inventoryQuery.data?.lowStockProducts ?? []).slice(0, 6).map((item) => (
-                  <li
+                  <DashboardTableRow
                     key={item.id}
-                    className="flex items-center justify-between gap-2 border-b border-border py-2 last:border-0"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-medium">{item.name || "Product"}</p>
-                      <p className="text-xs text-muted-foreground">{item.sku || "No SKU"}</p>
-                    </div>
-                    <span className="flex items-center gap-1 text-destructive">
-                      <AlertTriangle className="size-3.5" aria-hidden="true" />
-                      <span className="tabular-nums">{item.stockQuantity}</span>
-                    </span>
-                  </li>
+                    title={item.name || "Product"}
+                    subtitle={item.sku || "No SKU"}
+                    tone="danger"
+                    value={
+                      <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs">
+                        <AlertTriangle className="size-3.5" aria-hidden="true" />
+                        {item.stockQuantity}
+                      </span>
+                    }
+                  />
                 ))}
-              </ul>
+              </DashboardTable>
             )}
-          </section>
+          </DashboardPanel>
         ) : null}
 
         {canPurchases ? (
-          <section className="rounded-xl border border-border bg-card p-4">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <h2 className="text-sm font-medium">Recent purchases</h2>
-              <Link href="/purchases" className="text-sm text-secondary hover:underline">
-                Purchases
-              </Link>
-            </div>
+          <DashboardPanel title="Recent purchases" href="/purchases" linkLabel="Purchases">
             {recentPurchases.isLoading ? (
               <LoadingState className="py-6" label="Loading purchases..." />
             ) : recentPurchases.isError ? (
@@ -418,29 +380,21 @@ export function DashboardPage() {
             ) : (recentPurchases.data?.items ?? []).length === 0 ? (
               <EmptyState className="py-6" title="No recent purchases" />
             ) : (
-              <ul className="space-y-2 text-sm">
+              <DashboardTable primaryLabel="Purchase" valueLabel="Amount">
                 {(recentPurchases.data?.items ?? []).map((item) => (
-                  <li
+                  <DashboardTableRow
                     key={item.id}
-                    className="flex justify-between gap-2 border-b border-border py-2 last:border-0"
-                  >
-                    <span className="truncate">{item.purchaseNumber || "Purchase"}</span>
-                    <span className="tabular-nums">{formatCurrency(item.totalAmount)}</span>
-                  </li>
+                    title={item.purchaseNumber || "Purchase"}
+                    value={formatCurrency(item.totalAmount)}
+                  />
                 ))}
-              </ul>
+              </DashboardTable>
             )}
-          </section>
+          </DashboardPanel>
         ) : null}
 
         {canExpenses ? (
-          <section className="rounded-xl border border-border bg-card p-4">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <h2 className="text-sm font-medium">Recent expenses</h2>
-              <Link href="/expenses" className="text-sm text-secondary hover:underline">
-                Expenses
-              </Link>
-            </div>
+          <DashboardPanel title="Recent expenses" href="/expenses" linkLabel="Expenses">
             {recentExpenses.isLoading ? (
               <LoadingState className="py-6" label="Loading expenses..." />
             ) : recentExpenses.isError ? (
@@ -453,21 +407,35 @@ export function DashboardPage() {
             ) : (recentExpenses.data?.items ?? []).length === 0 ? (
               <EmptyState className="py-6" title="No recent expenses" />
             ) : (
-              <ul className="space-y-2 text-sm">
+              <DashboardTable primaryLabel="Expense" valueLabel="Amount">
                 {(recentExpenses.data?.items ?? []).map((item) => (
-                  <li
+                  <DashboardTableRow
                     key={item.id}
-                    className="flex justify-between gap-2 border-b border-border py-2 last:border-0"
-                  >
-                    <span className="truncate">{item.title || item.category || "Expense"}</span>
-                    <span className="tabular-nums">{formatCurrency(item.amount)}</span>
-                  </li>
+                    title={item.title || item.category || "Expense"}
+                    value={formatCurrency(item.amount)}
+                  />
                 ))}
-              </ul>
+              </DashboardTable>
             )}
-          </section>
+          </DashboardPanel>
         ) : null}
-      </div>
+      </DashboardReveal>
     </PageContainer>
+  );
+}
+
+function DashboardReveal({
+  delay,
+  className,
+  children,
+}: {
+  delay: number;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={cn("dashboard-reveal", className)} style={{ animationDelay: `${delay}ms` }}>
+      {children}
+    </div>
   );
 }

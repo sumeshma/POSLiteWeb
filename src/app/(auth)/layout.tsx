@@ -1,15 +1,9 @@
 import { Suspense, type ReactNode } from "react";
-import { PageLoading } from "@/components/shared/page-loading";
+import { AppLoadingSplash } from "@/components/shared/app-loading-splash";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-svh items-center justify-center p-6">
-          <PageLoading />
-        </div>
-      }
-    >
+    <Suspense fallback={<AppLoadingSplash description="Getting your shop ready…" />}>
       {children}
     </Suspense>
   );

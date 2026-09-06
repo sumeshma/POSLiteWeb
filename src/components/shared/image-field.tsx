@@ -6,15 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { resolveMediaUrl } from "@/lib/media";
 import { getErrorMessage } from "@/types/api";
-import { uploadCatalogImage } from "@/services/files.service";
+import { uploadCatalogImage, type FileUploadResult } from "@/services/files.service";
 
 type ImageFieldProps = {
   value: string | null;
   onChange: (value: string | null) => void;
   disabled?: boolean;
+  uploadFile?: (file: File) => Promise<FileUploadResult>;
 };
 
-export function ImageField({ value, onChange, disabled }: ImageFieldProps) {
+export function ImageField({ value, onChange, disabled, uploadFile }: ImageFieldProps) {
   const [uploading, setUploading] = useState(false);
   const preview = resolveMediaUrl(value);
 
@@ -25,7 +26,7 @@ export function ImageField({ value, onChange, disabled }: ImageFieldProps) {
 
     setUploading(true);
     try {
-      const result = await uploadCatalogImage(file);
+      const result = await (uploadFile ?? uploadCatalogImage)(file);
       onChange(result.url);
     } catch (error) {
       toast.error(getErrorMessage(error) || "Unable to upload image.");

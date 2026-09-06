@@ -76,6 +76,7 @@ export const queryKeys = {
   shopSettings: {
     all: () => ["shop-settings"] as const,
     current: () => [...queryKeys.shopSettings.all(), "current"] as const,
+    uiPickups: () => [...queryKeys.shopSettings.all(), "ui-pickups"] as const,
   },
   purchases: {
     all: () => ["purchases"] as const,

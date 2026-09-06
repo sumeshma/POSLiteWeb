@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { appConfig } from "@/config/app";
-import { appNavigation, filterNavigation } from "@/config/navigation";
+import { appNavigation, filterNavigation, getNavItemForPath } from "@/config/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { BrandLogo } from "@/components/layout/brand-logo";
 import { UserMenu } from "@/components/layout/user-menu";
@@ -32,12 +32,7 @@ function NavContent({ collapsed }: { collapsed: boolean }) {
             </p>
           ) : null}
           {group.items.map((item) => {
-            const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : item.href === "/reports"
-                  ? pathname === "/reports" || pathname.startsWith("/reports/")
-                  : pathname === item.href;
+            const isActive = getNavItemForPath(pathname)?.href === item.href;
 
             return (
               <Link
@@ -74,15 +69,14 @@ export function AppSidebar() {
       className={cn(
         "hidden h-full min-h-0 shrink-0 flex-col overflow-hidden border-r bg-sidebar text-sidebar-foreground lg:flex",
         "transition-[width] duration-200 ease-out motion-reduce:transition-none",
-        collapsed ? "w-16" : "w-64",
+        collapsed ? "w-16" : "w-56",
       )}
     >
-      <div className="flex h-16 shrink-0 items-center justify-center px-2">
-        <Link href="/" className="flex items-center justify-center" aria-label={appConfig.name}>
-          <BrandLogo compact={collapsed} priority />
+      <div className="flex h-16 shrink-0 items-center justify-center border-b px-2">
+        <Link href="/" className="flex max-w-full items-center justify-center" aria-label={appConfig.name}>
+          <BrandLogo compact={collapsed} className={collapsed ? "h-7" : "h-8"} priority />
         </Link>
       </div>
-      <Separator />
       <ScrollArea className="min-h-0 flex-1">
         <NavContent collapsed={collapsed} />
       </ScrollArea>
@@ -97,12 +91,11 @@ export function AppSidebar() {
 export function MobileNav() {
   return (
     <div className="flex h-full flex-col bg-sidebar">
-      <div className="flex h-16 shrink-0 items-center justify-center px-3">
-        <Link href="/" className="flex items-center justify-center" aria-label={appConfig.name}>
-          <BrandLogo priority />
+      <div className="flex h-16 shrink-0 items-center justify-center border-b px-3">
+        <Link href="/" className="flex max-w-full items-center justify-center" aria-label={appConfig.name}>
+          <BrandLogo className="h-8" priority />
         </Link>
       </div>
-      <Separator />
       <ScrollArea className="min-h-0 flex-1">
         <NavContent collapsed={false} />
       </ScrollArea>

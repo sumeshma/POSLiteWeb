@@ -191,6 +191,18 @@ export function updateSessionUser(user: AuthUser): void {
   });
 }
 
+export function updateSessionShopProfile(shopDisplayName: string | null | undefined): void {
+  const current = readSession();
+  if (!current) {
+    return;
+  }
+
+  writeSession({
+    ...current,
+    shopDisplayName: shopDisplayName ?? current.shopDisplayName,
+  });
+}
+
 export function subscribeSession(onStoreChange: () => void): () => void {
   if (!isBrowser()) {
     return () => undefined;

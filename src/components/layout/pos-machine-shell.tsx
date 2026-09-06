@@ -6,8 +6,8 @@ import { LayoutDashboard, LogOut, Menu, Monitor, ShoppingCart } from "lucide-rea
 import { useAuth } from "@/components/auth/auth-provider";
 import { BrandLogo } from "@/components/layout/brand-logo";
 import { FullscreenToggle } from "@/components/layout/fullscreen-toggle";
+import { HeaderShop } from "@/components/layout/header-shop";
 import { HeaderUserMenu } from "@/components/layout/user-menu";
-import { formatShopSessionLabel } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,8 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function PosMachineShell({ children }: { children: ReactNode }) {
-  const { session, logout } = useAuth();
-  const shopLabel = formatShopSessionLabel(session?.shopCode, session?.shopDisplayName);
+  const { logout } = useAuth();
 
   return (
     <div className="flex h-svh min-h-0 flex-col bg-background">
@@ -52,11 +51,12 @@ export function PosMachineShell({ children }: { children: ReactNode }) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <HeaderShop />
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <BrandLogo className="h-9" />
           <p className="hidden min-w-0 truncate text-xs text-muted-foreground sm:block">
             <Monitor className="mr-1 inline size-3 align-text-top" aria-hidden="true" />
-            {shopLabel ? `${shopLabel} · Machine Mode` : "Machine Mode"}
+            Machine Mode
           </p>
         </div>
         <FullscreenToggle />

@@ -5,9 +5,10 @@ import { usePathname } from "next/navigation";
 import { useAppShell } from "@/components/layout/app-shell-context";
 import { MobileNav } from "@/components/layout/app-sidebar";
 import { FullscreenToggle } from "@/components/layout/fullscreen-toggle";
+import { HeaderShop } from "@/components/layout/header-shop";
+import { HeaderUserMenu } from "@/components/layout/user-menu";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { HeaderUserMenu } from "@/components/layout/user-menu";
 
 function isStandardPosPath(pathname: string): boolean {
   return pathname.replace(/\/$/, "") === "/pos";
@@ -41,11 +42,12 @@ export function AppHeader() {
       >
         <PanelLeft className="size-4" />
       </Button>
+      <HeaderShop />
       <div className="min-w-0 flex-1" />
       {showFullscreen ? <FullscreenToggle /> : null}
       <HeaderUserMenu />
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-72 p-0" showCloseButton>
+        <SheetContent side="left" className="w-60 p-0" showCloseButton>
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <MobileNav />
         </SheetContent>

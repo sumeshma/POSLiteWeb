@@ -16,10 +16,11 @@ import {
   Users,
   Wallet,
   Warehouse,
+  type LucideIcon,
 } from "lucide-react";
 import { hasAnyPermission, hasPermission } from "@/lib/permissions";
 import { permissions } from "@/config/permissions";
-import type { LucideIcon } from "lucide-react";
+import { normalizePathname } from "@/lib/auth-paths";
 
 export type NavItem = {
   title: string;
@@ -184,16 +185,17 @@ export const appNavigation: NavGroup[] = [
 ];
 
 export function getNavItemForPath(pathname: string): NavItem | undefined {
+  const path = normalizePathname(pathname);
   const items = appNavigation.flatMap((group) => group.items);
   let best: NavItem | undefined;
   let bestLength = -1;
 
   for (const item of items) {
-    const matches =
-      pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`));
-    if (matches && item.href.length > bestLength) {
+    const href = normalizePathname(item.href);
+    const matches = path === href || (href !== "/" && path.startsWith(`${href}/`));
+    if (matches && href.length > bestLength) {
       best = item;
-      bestLength = item.href.length;
+      bestLength = href.length;
     }
   }
 

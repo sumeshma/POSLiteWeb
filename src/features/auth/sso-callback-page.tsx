@@ -3,7 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { BrandLogo } from "@/components/layout/brand-logo";
-import { LoadingState } from "@/components/shared/loading-state";
+import { AppLoadingSplash } from "@/components/shared/app-loading-splash";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const SSO_FAILURE_COPY = "Open the company again from Auralizz";
@@ -73,30 +73,21 @@ export function SsoCallbackPage() {
 
   const showError = isClient && (!code || failed);
 
-  return (
-    <div className="relative flex min-h-svh flex-col bg-background">
-      <div className="pointer-events-none absolute inset-0 bg-brand-gradient opacity-[0.07]" />
-      <div className="relative flex flex-1 items-center justify-center p-4 md:p-8">
-        <div className="w-full max-w-md">
-          <div className="mb-5 flex justify-center">
-            <div className="inline-flex items-center rounded-xl bg-white px-3 py-2 shadow-sm ring-1 ring-foreground/10">
-              <BrandLogo className="h-9" priority />
-            </div>
-          </div>
+  if (!showError) {
+    return <AppLoadingSplash />;
+  }
 
-          <div className="overflow-hidden rounded-xl bg-card text-card-foreground shadow-sm ring-1 ring-foreground/10">
-            <div className="h-1.5 bg-brand-gradient" />
-            <div className="p-6 md:p-8">
-              {showError ? (
-                <Alert variant="destructive">
-                  <AlertTitle>Unable to sign in</AlertTitle>
-                  <AlertDescription>{SSO_FAILURE_COPY}</AlertDescription>
-                </Alert>
-              ) : (
-                <LoadingState label="Signing you in to POS Lite…" className="py-8" />
-              )}
-            </div>
-          </div>
+  return (
+    <div className="flex min-h-svh items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md space-y-5">
+        <div className="flex justify-center">
+          <BrandLogo className="h-12" priority />
+        </div>
+        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-foreground/10 md:p-8">
+          <Alert variant="destructive">
+            <AlertTitle>Unable to sign in</AlertTitle>
+            <AlertDescription>{SSO_FAILURE_COPY}</AlertDescription>
+          </Alert>
         </div>
       </div>
     </div>

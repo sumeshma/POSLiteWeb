@@ -26,6 +26,7 @@ type PosCartPanelProps = {
   holdCount: number;
   submitting: boolean;
   variant?: "standard" | "machine";
+  className?: string;
   onIncrement: (productId: string) => void;
   onDecrement: (productId: string) => void;
   onQuantity: (productId: string, quantity: number) => void;
@@ -56,6 +57,7 @@ export function PosCartPanel({
   holdCount,
   submitting,
   variant = "standard",
+  className,
   onIncrement,
   onDecrement,
   onQuantity,
@@ -81,7 +83,12 @@ export function PosCartPanel({
   const itemCountLabel = itemCount === 1 ? "1 item" : `${itemCount} items`;
 
   return (
-    <aside className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-border bg-card">
+    <aside
+      className={cn(
+        "flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-border bg-card",
+        className,
+      )}
+    >
       <div className="flex shrink-0 items-center gap-2 border-b p-3">
         <UserRound className="size-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0 flex-1">
@@ -122,7 +129,7 @@ export function PosCartPanel({
         </Button>
       </div>
 
-      <div className="min-h-[8rem] flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {itemCount === 0 ? (
           <EmptyState
             className="py-8"

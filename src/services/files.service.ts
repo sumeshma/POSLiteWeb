@@ -10,3 +10,9 @@ export async function uploadCatalogImage(file: File): Promise<FileUploadResult> 
   body.append("file", file);
   return apiClient.post<FileUploadResult>("/api/files/upload?folder=catalog", body);
 }
+
+export async function uploadBrandingImage(file: File): Promise<FileUploadResult> {
+  const body = new FormData();
+  body.append("file", file);
+  return apiClient.post<FileUploadResult>("/api/files/upload?folder=branding", body);
+}

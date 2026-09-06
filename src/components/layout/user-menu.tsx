@@ -90,13 +90,12 @@ export function UserMenu({ compact = false }: UserMenuProps) {
 }
 
 export function HeaderUserMenu() {
-  const { user, session, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const displayName = getUserDisplayName(user);
   const initials = getUserInitials(user);
   const imageUrl = resolveMediaUrl(user?.profileImageUrl);
-  const shopLabel = formatShopSessionLabel(session?.shopCode, session?.shopDisplayName);
 
   return (
     <>
@@ -108,7 +107,7 @@ export function HeaderUserMenu() {
           <span className="hidden min-w-0 text-right sm:inline">
             <span className="block truncate text-sm font-medium">{displayName}</span>
             <span className="block truncate text-xs text-muted-foreground">
-              {shopLabel}
+              {user?.role}
             </span>
           </span>
           <Avatar size="sm">

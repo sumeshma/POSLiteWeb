@@ -3,7 +3,7 @@
 import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
-import { PageLoading } from "@/components/shared/page-loading";
+import { AppLoadingSplash } from "@/components/shared/app-loading-splash";
 import { getBrowserPathname, isPublicAuthPath } from "@/lib/auth-paths";
 
 export function AuthGuard({ children }: { children: ReactNode }) {
@@ -32,9 +32,9 @@ export function AuthGuard({ children }: { children: ReactNode }) {
 
   if (!isReady || !isAuthenticated) {
     return (
-      <div className="flex min-h-svh items-center justify-center p-6">
-        <PageLoading />
-      </div>
+      <AppLoadingSplash
+        description="Getting your shop ready…"
+      />
     );
   }
 

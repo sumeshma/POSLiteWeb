@@ -120,3 +120,20 @@ export type ShopSettings = {
   allowSellWhenOutOfStock: boolean;
   isGstEnabled: boolean;
 };
+
+export type UpdateShopSettingsRequest = {
+  businessName: string | null;
+  appDisplayName: string | null;
+  logoImageUrl: string | null;
+  gstin: string | null;
+  address: string | null;
+  phoneNumber: string | null;
+  selectedUiPickupId: number;
+  allowSellWhenOutOfStock: boolean;
+  isGstEnabled: boolean;
+};
+
+export type UiPickupOption = {
+  id: number;
+  name: string;
+};
