@@ -12,6 +12,7 @@ import { listProducts } from "@/services/products.service";
 import { getErrorMessage } from "@/types/api";
 import type { Bill, CheckoutRequest, HoldOrder } from "@/types/billing";
 import type { Product } from "@/types/product";
+import { printHtmlDocument } from "@/lib/print";
 import { printBillHtml } from "./bill-success-dialog";
 import { cartReducer, emptyCart } from "./cart-state";
 import { useActiveHoldCountQuery, usePosMutations, useShopSettingsQuery } from "./use-pos";
@@ -213,15 +214,12 @@ export function usePosWorkspace() {
       return;
     }
     const shopName = settingsQuery.data?.appDisplayName || settingsQuery.data?.businessName || "POS Lite";
-    const popup = window.open("", "_blank", "noopener,noreferrer,width=480,height=640");
-    if (!popup) {
-      toast.error("Allow pop-ups to print the bill.");
+    try {
+      printHtmlDocument(printBillHtml(bill, shopName));
+    } catch {
+      toast.error("Unable to print the bill.");
       return;
     }
-    popup.document.write(printBillHtml(bill, shopName));
-    popup.document.close();
-    popup.focus();
-    popup.print();
     void mutations.print.mutateAsync(bill.id).catch(() => {
       toast.error("Bill printed, but print count could not be recorded.");
     });
