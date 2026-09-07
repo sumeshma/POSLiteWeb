@@ -10,11 +10,11 @@ import {
   type ReactNode,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { appConfig } from "@/config/app";
 import { env } from "@/config/env";
 import { queryKeys } from "@/config/query-keys";
-import { isPublicAuthPath } from "@/lib/auth-paths";
+import { hardNavigate, isPublicAuthPath } from "@/lib/auth-paths";
 import { hasPermission } from "@/lib/permissions";
 import {
   clearSession,
@@ -79,7 +79,6 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const router = useRouter();
   const pathname = usePathname();
   const isReady = useHasHydrated();
   const rawSession = useSyncExternalStore(
@@ -94,10 +93,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.removeQueries({ queryKey: queryKeys.auth.all() });
       queryClient.clear();
       if (!isPublicAuthPath(pathname)) {
-        router.replace("/login?reason=session");
+        hardNavigate("/login?reason=session");
       }
     });
-  }, [pathname, queryClient, router]);
+  }, [pathname, queryClient]);
 
   const persistShopSession = useCallback(
     async (data: Parameters<typeof persistAuthSession>[0]) => {
@@ -189,9 +188,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         window.location.assign(env.auralizzHomeUrl);
         return;
       }
-      router.replace("/login");
+      hardNavigate("/login");
     }
-  }, [queryClient, router, session?.refreshToken]);
+  }, [queryClient, session?.refreshToken]);
 
   const can = useCallback(
     (permission: string) =>

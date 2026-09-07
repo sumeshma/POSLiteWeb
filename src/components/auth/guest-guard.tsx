@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
-import { PageLoading } from "@/components/shared/page-loading";
+import { AppLoadingSplash } from "@/components/shared/app-loading-splash";
+import { getPostLoginPath, hardNavigate } from "@/lib/auth-paths";
 
 export function GuestGuard({ children }: { children: ReactNode }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { isReady, isAuthenticated } = useAuth();
 
@@ -15,25 +15,11 @@ export function GuestGuard({ children }: { children: ReactNode }) {
       return;
     }
 
-    const from = searchParams.get("from");
-    const target = from && from.startsWith("/") && !from.startsWith("//") ? from : "/";
-    router.replace(target);
-  }, [isAuthenticated, isReady, router, searchParams]);
+    hardNavigate(getPostLoginPath(searchParams.get("from")));
+  }, [isAuthenticated, isReady, searchParams]);
 
-  if (!isReady) {
-    return (
-      <div className="flex min-h-svh items-center justify-center p-6">
-        <PageLoading />
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    return (
-      <div className="flex min-h-svh items-center justify-center p-6">
-        <PageLoading />
-      </div>
-    );
+  if (!isReady || isAuthenticated) {
+    return <AppLoadingSplash description="Getting your shop ready…" />;
   }
 
   return children;

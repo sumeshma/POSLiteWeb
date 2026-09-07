@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, Eye, EyeOff, Loader2, Lock, UserRound } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { getPostLoginPath, hardNavigate } from "@/lib/auth-paths";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,6 +72,7 @@ export function LoginForm() {
     setFormError(null);
     try {
       await login(values);
+      hardNavigate(getPostLoginPath(searchParams.get("from")));
     } catch (error) {
       setFormError(getErrorMessage(error));
     }

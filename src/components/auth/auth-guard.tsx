@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { AppLoadingSplash } from "@/components/shared/app-loading-splash";
-import { getBrowserPathname, isPublicAuthPath } from "@/lib/auth-paths";
+import { getBrowserPathname, hardNavigate, isPublicAuthPath } from "@/lib/auth-paths";
 
 export function AuthGuard({ children }: { children: ReactNode }) {
-  const router = useRouter();
   const pathname = usePathname();
   const { isReady, isAuthenticated } = useAuth();
   const requestPath = getBrowserPathname(pathname);
@@ -23,8 +22,8 @@ export function AuthGuard({ children }: { children: ReactNode }) {
       params.set("from", pathname);
     }
     const query = params.toString();
-    router.replace(query ? `/login?${query}` : "/login");
-  }, [isAuthenticated, isPublic, isReady, pathname, router]);
+    hardNavigate(query ? `/login?${query}` : "/login");
+  }, [isAuthenticated, isPublic, isReady, pathname]);
 
   if (isPublic) {
     return null;
