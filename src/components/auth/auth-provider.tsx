@@ -148,16 +148,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const completeSso = useCallback(
     async (code: string) => {
-      // Drop any previous POS Lite shop session first. Otherwise Open Workspace
-      // keeps the last password-login shop (tokens, X-Shop-Code, React Query).
-      clearSession();
-      queryClient.clear();
-
       const data = await completeSsoRequest({ code });
       if (!isCompleteAuthPayload(data)) {
         throw new Error("SSO_INCOMPLETE");
       }
 
+      // Overwrite any previous shop only after the code redeems. Clearing first
+      // dropped a successful first call, then a remount burned the one-time code.
       await persistShopSession({
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
@@ -170,7 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sessionInfo: data.sessionInfo,
       });
     },
-    [persistShopSession, queryClient],
+    [persistShopSession],
   );
 
   const logout = useCallback(async () => {

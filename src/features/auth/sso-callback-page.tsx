@@ -1,26 +1,32 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { BrandLogo } from "@/components/layout/brand-logo";
 import { AppLoadingSplash } from "@/components/shared/app-loading-splash";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const SSO_FAILURE_COPY = "Open the company again from Auralizz";
+const SSO_DONE_PREFIX = "poslite.sso.done:";
 
 const ssoAttempts = new Map<string, Promise<"ok" | "error">>();
 
-function subscribeSearch(onStoreChange: () => void): () => void {
-  window.addEventListener("popstate", onStoreChange);
-  return () => window.removeEventListener("popstate", onStoreChange);
+function readCallbackCode(): string {
+  return new URLSearchParams(window.location.search).get("code")?.trim() ?? "";
 }
 
-function getSearch(): string {
-  return window.location.search;
+function doneKey(code: string): string {
+  return `${SSO_DONE_PREFIX}${code}`;
 }
 
-function readCallbackCode(search: string): string {
-  return new URLSearchParams(search).get("code")?.trim() ?? "";
+function waitForVisibleDocument(): Promise<void> {
+  if (!document.prerendering) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    document.addEventListener("prerenderingchange", () => resolve(), { once: true });
+  });
 }
 
 function redeemOnce(code: string, redeem: (code: string) => Promise<void>): Promise<"ok" | "error"> {
@@ -38,42 +44,46 @@ function redeemOnce(code: string, redeem: (code: string) => Promise<void>): Prom
 
 export function SsoCallbackPage() {
   const { completeSso } = useAuth();
-  const isClient = useSyncExternalStore(
-    () => () => undefined,
-    () => true,
-    () => false,
-  );
-  const search = useSyncExternalStore(subscribeSearch, getSearch, () => "");
-  const code = isClient ? readCallbackCode(search) : "";
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    if (!code) {
-      return;
-    }
-
     let active = true;
-    void redeemOnce(code, completeSso).then((result) => {
+
+    void (async () => {
+      await waitForVisibleDocument();
+      if (!active) {
+        return;
+      }
+
+      const code = readCallbackCode();
+      if (!code) {
+        setFailed(true);
+        return;
+      }
+
+      if (sessionStorage.getItem(doneKey(code)) === "ok") {
+        window.location.replace("/");
+        return;
+      }
+
+      const result = await redeemOnce(code, completeSso);
       if (!active) {
         return;
       }
       if (result === "ok") {
-        // Full load so AuthGuard and API headers boot from the new shop session.
-        // Client replace("/") left the previous shop in memory until a refresh.
+        sessionStorage.setItem(doneKey(code), "ok");
         window.location.replace("/");
         return;
       }
       setFailed(true);
-    });
+    })();
 
     return () => {
       active = false;
     };
-  }, [code, completeSso]);
+  }, [completeSso]);
 
-  const showError = isClient && (!code || failed);
-
-  if (!showError) {
+  if (!failed) {
     return <AppLoadingSplash />;
   }
 
