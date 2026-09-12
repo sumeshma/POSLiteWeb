@@ -12,12 +12,11 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { appConfig } from "@/config/app";
-import { env } from "@/config/env";
 import { queryKeys } from "@/config/query-keys";
 import { hardNavigate, isPublicAuthPath } from "@/lib/auth-paths";
+import { captureAuralizzReturnUrl, isExternalExit, leaveAfterSessionEnd } from "@/lib/auralizz-return";
 import { hasPermission } from "@/lib/permissions";
 import {
-  clearSession,
   getServerSessionSnapshot,
   getSessionSnapshot,
   isCompleteAuthPayload,
@@ -92,9 +91,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return subscribeUnauthorized(() => {
       queryClient.removeQueries({ queryKey: queryKeys.auth.all() });
       queryClient.clear();
-      if (!isPublicAuthPath(pathname)) {
-        hardNavigate("/login?reason=session");
+      if (isExternalExit() || isPublicAuthPath(pathname)) {
+        return;
       }
+      hardNavigate("/login?reason=session");
     });
   }, [pathname, queryClient]);
 
@@ -141,6 +141,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         shopCode,
         user: data.user,
         session: data.session,
+        openedFrom: "password",
+        returnTo: null,
       });
     },
     [persistShopSession],
@@ -165,6 +167,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: data.user,
         session: data.session,
         sessionInfo: data.sessionInfo,
+        openedFrom: "sso",
+        returnTo: captureAuralizzReturnUrl(),
       });
     },
     [persistShopSession],
@@ -179,15 +183,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // Always clear the local session, even if the API logout call fails.
     } finally {
-      clearSession();
       queryClient.clear();
-      if (env.auralizzHomeUrl) {
-        window.location.assign(env.auralizzHomeUrl);
-        return;
-      }
-      hardNavigate("/login");
+      leaveAfterSessionEnd(session, "logout");
     }
-  }, [queryClient, session?.refreshToken]);
+  }, [queryClient, session]);
 
   const can = useCallback(
     (permission: string) =>

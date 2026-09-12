@@ -105,6 +105,8 @@ type AuthSessionPayload = {
   shopDisplayName?: string | null;
   session?: SessionInfo | null;
   sessionInfo?: SessionInfo | null;
+  openedFrom?: "sso" | "password";
+  returnTo?: string | null;
 };
 
 export function isCompleteAuthPayload(
@@ -131,6 +133,8 @@ export function persistAuthSession(data: AuthSessionPayload): void {
     shopDisplayName: data.shopDisplayName ?? null,
     user: data.user,
     sessionInfo: data.sessionInfo ?? data.session ?? null,
+    openedFrom: data.openedFrom,
+    returnTo: data.returnTo ?? null,
   });
 }
 

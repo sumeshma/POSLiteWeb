@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { AppLoadingSplash } from "@/components/shared/app-loading-splash";
 import { getBrowserPathname, hardNavigate, isPublicAuthPath } from "@/lib/auth-paths";
+import { isExternalExit } from "@/lib/auralizz-return";
 
 export function AuthGuard({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -13,7 +14,7 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   const isPublic = isPublicAuthPath(requestPath) || isPublicAuthPath(pathname);
 
   useEffect(() => {
-    if (!isReady || isAuthenticated || isPublic) {
+    if (!isReady || isAuthenticated || isPublic || isExternalExit()) {
       return;
     }
 

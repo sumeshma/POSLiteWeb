@@ -6,13 +6,14 @@ import {
   type AuthTokenPair,
 } from "@/types/api";
 import {
-  clearSession,
   getAccessToken,
   getRefreshToken,
   getShopCode,
   notifyUnauthorized,
+  readSession,
   updateSessionTokens,
 } from "@/lib/session";
+import { leaveAfterSessionEnd } from "@/lib/auralizz-return";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -143,7 +144,7 @@ async function refreshAccessToken(): Promise<boolean> {
       updateSessionTokens(tokens);
       return true;
     } catch {
-      clearSession();
+      leaveAfterSessionEnd(readSession(), "session");
       notifyUnauthorized();
       return false;
     }

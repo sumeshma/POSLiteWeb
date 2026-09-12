@@ -87,6 +87,8 @@ export type PersistedSession = {
   shopDisplayName?: string | null;
   user: AuthUser;
   sessionInfo?: SessionInfo | null;
+  openedFrom?: "sso" | "password";
+  returnTo?: string | null;
 };
 
 export function getUserDisplayName(user: AuthUser | null | undefined): string {
