@@ -19,13 +19,18 @@ function doneKey(code: string): string {
   return `${SSO_DONE_PREFIX}${code}`;
 }
 
+type PrerenderingDocument = Document & {
+  prerendering?: boolean;
+};
+
 function waitForVisibleDocument(): Promise<void> {
-  if (!document.prerendering) {
+  const doc = document as PrerenderingDocument;
+  if (!doc.prerendering) {
     return Promise.resolve();
   }
 
   return new Promise((resolve) => {
-    document.addEventListener("prerenderingchange", () => resolve(), { once: true });
+    doc.addEventListener("prerenderingchange", () => resolve(), { once: true });
   });
 }
 
