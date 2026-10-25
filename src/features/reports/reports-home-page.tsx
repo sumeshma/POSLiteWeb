@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  Boxes,
   ClipboardList,
   FileBarChart,
   Receipt,
@@ -43,6 +44,13 @@ export function ReportsHomePage() {
       available: can(permissions.reportsProfit),
     },
     {
+      href: "/reports/products",
+      title: "Product sales",
+      description: "Item quantities, revenue, and bill lines from completed POS bills.",
+      icon: Boxes,
+      available: can(permissions.reports),
+    },
+    {
       href: "/reports/gst",
       title: "GST report",
       description: "Taxable amount and GST totals for a date range supplied by the backend.",
@@ -77,7 +85,7 @@ export function ReportsHomePage() {
     <PageContainer>
       <PageHeader
         title="Reports"
-        description="Operational reports from verified backend summaries and existing shop records. Product performance reports are not provided by the API."
+        description="Operational reports from verified backend summaries and existing shop records."
       />
 
       {visible.length === 0 ? (

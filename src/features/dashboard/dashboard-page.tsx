@@ -22,6 +22,7 @@ import { DashboardPanel, DashboardTable, DashboardTableRow } from "./dashboard-p
 import { QuickAccessBar, type QuickAccessItem } from "./quick-access-bar";
 import { permissions } from "@/config/permissions";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useCreditInvoiceAccess } from "@/features/credit-invoices/use-credit-invoice-access";
 import { useActiveHoldCountQuery } from "@/features/pos/use-pos";
 import { useInventoryDashboardQuery } from "@/features/inventory/use-inventory";
 import { useExpensesQuery } from "@/features/expenses/use-expenses";
@@ -32,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { getErrorMessage } from "@/types/api";
 import { monthLabel } from "./period";
 import { formatKpiCurrency, formatKpiNumber, KpiCard } from "./kpi-card";
+import { CreditSummaryStrip } from "./credit-summary-strip";
 import { DashboardCharts } from "./dashboard-charts";
 import { SalesCharts, type TrendPoint } from "./sales-charts";
 import {
@@ -46,6 +48,7 @@ import { getOrderTypeBreakdown, getPaymentBreakdown } from "@/features/reports/r
 
 export function DashboardPage() {
   const { can } = useAuth();
+  const credit = useCreditInvoiceAccess();
   const { period, setPeriod, resolved } = useReportPeriod("today");
   const canReports = can(permissions.reports);
   const canMonthly = can(permissions.reportsMonthly);
@@ -193,6 +196,7 @@ export function DashboardPage() {
   const quickAccessItems: QuickAccessItem[] = [
     canPos ? { href: "/pos", label: "New sale", icon: ShoppingCart } : null,
     canOpenReports ? { href: "/reports", label: "Reports", icon: FileBarChart } : null,
+    credit.canRead ? { href: "/credit-invoices", label: "Credit invoices", icon: Receipt } : null,
     can(permissions.productsManage)
       ? { href: "/products", label: "Products", icon: PackagePlus }
       : null,
@@ -262,6 +266,12 @@ export function DashboardPage() {
           tone="destructive"
         />
       </DashboardReveal>
+
+      {credit.canRead ? (
+        <DashboardReveal delay={90}>
+          <CreditSummaryStrip />
+        </DashboardReveal>
+      ) : null}
 
       <DashboardReveal delay={120}>
         {salesEnabled ? (

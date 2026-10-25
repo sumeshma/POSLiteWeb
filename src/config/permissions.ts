@@ -24,6 +24,7 @@ export const permissions = {
   purchases: "purchases",
   purchasesManage: "purchases.manage",
   settingsShop: "settings.shop",
+  creditInvoices: "credit.invoices",
   printer: "printer",
   usersManage: "users.manage",
   rolesManage: "roles.manage",

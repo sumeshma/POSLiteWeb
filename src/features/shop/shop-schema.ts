@@ -10,6 +10,7 @@ export const shopSettingsFormSchema = z.object({
   selectedUiPickupId: z.string(),
   allowSellWhenOutOfStock: z.boolean(),
   isGstEnabled: z.boolean(),
+  isCreditInvoiceEnabled: z.boolean(),
 });
 
 export type ShopSettingsFormValues = z.infer<typeof shopSettingsFormSchema>;
@@ -24,4 +25,5 @@ export const emptyShopSettingsForm: ShopSettingsFormValues = {
   selectedUiPickupId: "0",
   allowSellWhenOutOfStock: false,
   isGstEnabled: false,
+  isCreditInvoiceEnabled: false,
 };

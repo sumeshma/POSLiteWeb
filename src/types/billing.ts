@@ -119,6 +119,7 @@ export type ShopSettings = {
   selectedUiPickupName: string | null;
   allowSellWhenOutOfStock: boolean;
   isGstEnabled: boolean;
+  isCreditInvoiceEnabled: boolean;
 };
 
 export type UpdateShopSettingsRequest = {
@@ -131,6 +132,8 @@ export type UpdateShopSettingsRequest = {
   selectedUiPickupId: number;
   allowSellWhenOutOfStock: boolean;
   isGstEnabled: boolean;
+  /** Omit to leave the stored flag unchanged. */
+  isCreditInvoiceEnabled?: boolean | null;
 };
 
 export type UiPickupOption = {

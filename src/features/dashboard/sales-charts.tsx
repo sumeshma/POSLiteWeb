@@ -32,6 +32,9 @@ type SalesChartsProps = {
   trendHint?: string;
   payments: PaymentBreakdown[];
   orderTypes: OrderTypeBreakdown[];
+  salesSeriesLabel?: string;
+  countSeriesLabel?: string;
+  countAllowDecimals?: boolean;
 };
 
 const tooltipStyle = {
@@ -41,7 +44,16 @@ const tooltipStyle = {
   color: "var(--popover-foreground)",
 };
 
-export function SalesCharts({ trend, trendTitle, trendHint, payments, orderTypes }: SalesChartsProps) {
+export function SalesCharts({
+  trend,
+  trendTitle,
+  trendHint,
+  payments,
+  orderTypes,
+  salesSeriesLabel = "Sales",
+  countSeriesLabel = "Bills",
+  countAllowDecimals = false,
+}: SalesChartsProps) {
   const reduceMotion = usePrefersReducedMotion();
   const animate = !reduceMotion;
   const hasTrend = trend.length > 0;
@@ -93,19 +105,19 @@ export function SalesCharts({ trend, trendTitle, trendHint, payments, orderTypes
                 <YAxis
                   yAxisId="orders"
                   orientation="right"
-                  allowDecimals={false}
+                  allowDecimals={countAllowDecimals}
                   tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
                 />
                 <Tooltip
                   contentStyle={tooltipStyle}
                   formatter={(value, name) =>
                     name === "totalSales"
-                      ? [formatCurrency(Number(value)), "Sales"]
-                      : [String(value), "Bills"]
+                      ? [formatCurrency(Number(value)), salesSeriesLabel]
+                      : [String(value), countSeriesLabel]
                   }
                 />
                 <Legend
-                  formatter={(value) => (value === "totalSales" ? "Sales" : "Bills")}
+                  formatter={(value) => (value === "totalSales" ? salesSeriesLabel : countSeriesLabel)}
                   wrapperStyle={{ fontSize: "12px" }}
                 />
                 <Bar

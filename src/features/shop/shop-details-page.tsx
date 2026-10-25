@@ -51,6 +51,7 @@ function toFormValues(settings: ShopSettings): ShopSettingsFormValues {
     selectedUiPickupId: String(settings.selectedUiPickupId ?? 0),
     allowSellWhenOutOfStock: settings.allowSellWhenOutOfStock,
     isGstEnabled: settings.isGstEnabled,
+    isCreditInvoiceEnabled: settings.isCreditInvoiceEnabled === true,
   };
 }
 
@@ -88,6 +89,7 @@ export function ShopDetailsPage() {
         selectedUiPickupId: Number(values.selectedUiPickupId) || 0,
         allowSellWhenOutOfStock: values.allowSellWhenOutOfStock,
         isGstEnabled: values.isGstEnabled,
+        isCreditInvoiceEnabled: values.isCreditInvoiceEnabled,
       });
       const shopCode = session?.shopCode ?? "";
       updateSessionShopProfile(
@@ -142,6 +144,10 @@ export function ShopDetailsPage() {
             value={settings.allowSellWhenOutOfStock ? "Allowed" : "Blocked"}
           />
           <ShopDetail label="GST on bills" value={settings.isGstEnabled ? "Enabled" : "Disabled"} />
+          <ShopDetail
+            label="Credit invoices"
+            value={settings.isCreditInvoiceEnabled ? "Enabled" : "Disabled"}
+          />
           <div className="space-y-1 sm:col-span-2">
             <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
               Address
@@ -283,6 +289,26 @@ export function ShopDetailsPage() {
                 render={({ field }) => (
                   <div className="flex h-8 items-center">
                     <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={mutations.update.isPending}
+                    />
+                  </div>
+                )}
+              />
+            </FormField>
+            <FormField
+              label="Credit invoices"
+              htmlFor="shop-credit-invoices"
+              description="Staff can create invoices and take payments only while this is on. Admins can still open history when it is off."
+            >
+              <Controller
+                control={form.control}
+                name="isCreditInvoiceEnabled"
+                render={({ field }) => (
+                  <div className="flex h-8 items-center">
+                    <Switch
+                      id="shop-credit-invoices"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                       disabled={mutations.update.isPending}

@@ -125,4 +125,70 @@ export type GstReport = {
   rateBreakdown: GstRateBreakdown[] | null;
 };
 
+export type ProductSalesSort = "revenue" | "quantity" | "name";
+
+export const PRODUCT_SALES_SORTS: { id: ProductSalesSort; label: string }[] = [
+  { id: "revenue", label: "Revenue" },
+  { id: "quantity", label: "Quantity" },
+  { id: "name", label: "Name" },
+];
+
+export type ProductSalesItem = {
+  productId: string;
+  productName: string | null;
+  sku: string | null;
+  size: string | null;
+  categoryName: string | null;
+  unit: string | null;
+  quantitySold: number;
+  orderCount: number;
+  revenue: number;
+  discountAmount: number;
+  taxAmount: number;
+  costOfGoodsSold: number;
+  grossProfit: number;
+};
+
+export type ProductSalesDailyPoint = {
+  date: string;
+  quantitySold: number;
+  revenue: number;
+};
+
+export type ProductSalesBillLine = {
+  orderId: string;
+  billNumber: string | null;
+  soldAt: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+  discountAmount: number;
+};
+
+export type ProductSalesReport = {
+  fromDate: string;
+  toDate: string;
+  totalProducts: number;
+  totalQuantitySold: number;
+  totalRevenue: number;
+  items: ProductSalesItem[] | null;
+  selectedProductId: string | null;
+  dailyBreakdown: ProductSalesDailyPoint[] | null;
+  billLines: ProductSalesBillLine[] | null;
+  billLineTotalCount: number;
+  billLinePage: number;
+  billLinePageSize: number;
+};
+
+export type ProductSalesParams = {
+  fromDate: string;
+  toDate: string;
+  sortBy?: ProductSalesSort;
+  limit?: number;
+  search?: string;
+  productId?: string;
+  billLinePage?: number;
+  billLinePageSize?: number;
+};
+
 export type ReportPeriodKind = "daily" | "monthly" | "yearly";

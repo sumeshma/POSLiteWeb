@@ -9,6 +9,7 @@ import {
   ScrollText,
   Shield,
   ShieldCheck,
+  Receipt,
   ShoppingCart,
   Tags,
   Truck,
@@ -109,6 +110,12 @@ export const appNavigation: NavGroup[] = [
         href: "/pos/machine",
         icon: Monitor,
         permission: permissions.pos,
+      },
+      {
+        title: "Credit invoices",
+        href: "/credit-invoices",
+        icon: Receipt,
+        permission: permissions.creditInvoices,
       },
       {
         title: "Customers",

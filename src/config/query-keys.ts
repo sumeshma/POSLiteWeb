@@ -106,6 +106,7 @@ export const queryKeys = {
     yearlyProfit: (year?: number) => [...queryKeys.reports.all(), "yearly-pl", year ?? 0] as const,
     gst: (fromDate: string, toDate: string) =>
       [...queryKeys.reports.all(), "gst", fromDate, toDate] as const,
+    products: (filters: unknown) => [...queryKeys.reports.all(), "products", filters] as const,
   },
   orders: {
     all: () => ["orders"] as const,
@@ -137,5 +138,17 @@ export const queryKeys = {
     all: () => ["attendance"] as const,
     list: (filters: unknown) => [...queryKeys.attendance.all(), "list", filters] as const,
     dashboard: () => [...queryKeys.attendance.all(), "dashboard"] as const,
+  },
+  creditInvoices: {
+    all: () => ["credit-invoices"] as const,
+    featureStatus: () => [...queryKeys.creditInvoices.all(), "feature-status"] as const,
+    summary: () => [...queryKeys.creditInvoices.all(), "summary"] as const,
+    byNumber: (invoiceNumber: string) =>
+      [...queryKeys.creditInvoices.all(), "by-number", invoiceNumber] as const,
+    payments: (id: string) => [...queryKeys.creditInvoices.all(), "payments", id] as const,
+    outstanding: (filters: unknown) =>
+      [...queryKeys.creditInvoices.all(), "outstanding", filters] as const,
+    collections: (filters: unknown) =>
+      [...queryKeys.creditInvoices.all(), "collections", filters] as const,
   },
 };

@@ -8,9 +8,11 @@ import {
   getGstReport,
   getMonthlyProfitLossReport,
   getMonthlySalesReport,
+  getProductSalesReport,
   getYearlyProfitLossReport,
   getYearlySalesReport,
 } from "@/services/reports.service";
+import type { ProductSalesParams } from "@/types/report";
 
 export function useDailySalesQuery(date: string | undefined, options?: { enabled?: boolean }) {
   return useQuery({
@@ -65,6 +67,18 @@ export function useYearlyProfitLossQuery(year: number | undefined, options?: { e
     queryKey: queryKeys.reports.yearlyProfit(year),
     queryFn: ({ signal }) => getYearlyProfitLossReport(year, signal),
     enabled: options?.enabled ?? true,
+  });
+}
+
+export function useProductSalesQuery(
+  params: ProductSalesParams,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: queryKeys.reports.products(params),
+    queryFn: ({ signal }) => getProductSalesReport(params, signal),
+    enabled: (options?.enabled ?? true) && Boolean(params.fromDate && params.toDate),
+    placeholderData: (previous) => previous,
   });
 }
 

@@ -34,6 +34,7 @@ export function useShopSettingsMutations() {
     mutationFn: (body: UpdateShopSettingsRequest) => updateShopSettings(body),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.shopSettings.all() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.creditInvoices.featureStatus() });
       const shopCode = getShopCode();
       if (shopCode) {
         void queryClient.invalidateQueries({ queryKey: queryKeys.shop.branding(shopCode) });

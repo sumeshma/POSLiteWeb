@@ -6,6 +6,8 @@ import type {
   GstReport,
   MonthlyProfitLossReport,
   MonthlySalesReport,
+  ProductSalesParams,
+  ProductSalesReport,
   YearlyProfitLossReport,
   YearlySalesReport,
 } from "@/types/report";
@@ -68,6 +70,25 @@ export async function getYearlyProfitLossReport(
 ): Promise<YearlyProfitLossReport> {
   return apiClient.get<YearlyProfitLossReport>(
     `/api/reports/profit-loss/yearly${toSearchParams({ year })}`,
+    { signal },
+  );
+}
+
+export async function getProductSalesReport(
+  params: ProductSalesParams,
+  signal?: AbortSignal,
+): Promise<ProductSalesReport> {
+  return apiClient.get<ProductSalesReport>(
+    `/api/reports/products${toSearchParams({
+      fromDate: params.fromDate,
+      toDate: params.toDate,
+      sortBy: params.sortBy,
+      limit: params.limit,
+      search: params.search,
+      productId: params.productId,
+      billLinePage: params.productId ? params.billLinePage : undefined,
+      billLinePageSize: params.productId ? params.billLinePageSize : undefined,
+    })}`,
     { signal },
   );
 }
